@@ -1,15 +1,9 @@
 import React from 'react'
 
-export const Tolls = ({setColorState , colorState , canvas}) => {
-    const clearAll = ()=>{
-        canvas.clear()
-        const bgRect = new fabric.Rect({
-          width: canvas.width,
-          height: canvas.height,
-          fill: 'white',
-          selectable: false // Make it unselectable
-        });
-        canvas.add(bgRect);
+export const Tolls = ({setColorState , colorState , canvas , clearAll}) => {
+    const clearAllhandler = ()=>{
+      canvas.remove.apply(canvas, canvas.getObjects().concat()) 
+      clearAll()
     
       }
       const addText = ()=>{
@@ -22,10 +16,23 @@ export const Tolls = ({setColorState , colorState , canvas}) => {
           editable: true ,// Enable text editing
           selectable: true
         });
-    
+        console.log(canvas.getObjects());
         // Add the text object to the canvas
         canvas.add(text);
         canvas.setActiveObject(text)
+      }
+      const addFigure = ()=>{
+        const rect = new fabric.Rect({
+          width: 200,
+          height: 200,
+          selectable: true ,
+          fill: 'transparent' ,
+          stroke:"black",
+          strokeWidth:2
+        });
+        canvas.add(rect);
+        canvas.setActiveObject(rect)    
+        console.log(canvas.getObjects());
       }
   return (
     <div>
@@ -40,13 +47,12 @@ export const Tolls = ({setColorState , colorState , canvas}) => {
       style={{outline: colorState == 'white'?'4px auto -webkit-focus-ring-color':'none'}}>
         Eraser
       </button>
-      <button onClick={() => {
-        clearAll()
-      }}
+      <button onClick={clearAllhandler}
       >
         Clear All
       </button>
       <button onClick={addText}>add text</button>
+      <button onClick={addFigure}>add figure</button>
 
     </div>
   )
