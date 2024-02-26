@@ -18,11 +18,13 @@ const wsconnect = ()=>{
 
 
             }else if(typeof JSON.parse(message) === 'object'){
-                const req = JSON.parse(message)         
-                const table = await Tables.findByIdAndUpdate(req.id,req.data)
-                console.log(req.data);
+                const req = JSON.parse(message)
+                const table = await Tables.findById(req.id)
+                table.line.push([req.data.line])    
+                console.log(table);
+                const newtable = await Tables.findByIdAndUpdate(req.id,{ eraser:table.eraser, line: [...table.line,[...req.data.line]],squares:table.squares, texts:table.texts})
                 server.clients.forEach(client=>{
-                    client.send(JSON.stringify({...req.data ,color:req.color}))
+                    client.send(JSON.stringify({...req.data ,line:[req.data.line],color:req.color}))
                 })
                 
                     

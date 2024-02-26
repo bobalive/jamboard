@@ -44,7 +44,7 @@ const Canvas = () => {
     newCanvas.add(text);
 
     ws.onmessage = (res)=>{
-      drawPath(JSON.parse(res.data).line, 'black' , newCanvas)
+      drawPath(JSON.parse(res.data).line,JSON.parse(res.data).color  , newCanvas)
     }
     const getTable = async()=>{
       let res = await axios.get('http://localhost:8000/65db8ab758d8608248f94bb4')
@@ -149,7 +149,7 @@ const Canvas = () => {
       ws.send(JSON.stringify(
       {id:'65db8ab758d8608248f94bb4',
       data:{
-      line:[...pathState,[...path]],
+      line:[...path],
       eraser:[],
       squares:[],
       texts:[]
