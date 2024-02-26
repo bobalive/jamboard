@@ -12,8 +12,7 @@ function App() {
     <div style={{width:'100vw', display:'flex' , justifyContent:'center'}}>
       <BrowserRouter>
       <Routes>
-      <Route path = '/'></Route>
-      <Route path='/:id' element={<Canvas table = {table} setTable = {setTable}/>}></Route>
+      <Route path='/' element={<Canvas table = {table} setTable = {setTable}/>}></Route>
       </Routes>
  
       </BrowserRouter>
