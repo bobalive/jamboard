@@ -44,36 +44,36 @@ const Canvas = () => {
     newCanvas.add(text);
 
     ws.onmessage = (res)=>{
-      drawPath(JSON.parse(res.data).line,JSON.parse(res.data).color  , newCanvas)
+      console.log(res.data);
+      if(res.data =='clear'){
+        newCanvas.remove.apply(newCanvas, newCanvas.getObjects().concat())
+      }else{
+        drawPath(JSON.parse(res.data).line,JSON.parse(res.data).color  , newCanvas)
+        drawPath(JSON.parse(res.data).eraser,'white'  , newCanvas)
+      }
+
     }
     const getTable = async()=>{
       let res = await axios.get('http://localhost:8000/65db8ab758d8608248f94bb4')
       if(res.status == 200){
-        console.log(res.data.line);
-        setPath(res.data.line)
-        drawPath(res.data.line , "black" ,newCanvas)
-        
+        setTimeout(()=>drawPath(res.data.line , "black" ,newCanvas))
       }
     }
     getTable()
   
     const drawPath = (path, color, canvas) => {
-      if (!canvas) return;
-    
-      path.forEach(points => {
-        let i = 0;
-        const interval = setInterval(() => {
-          if (i >= points.length - 1) {
-            clearInterval(interval);
-            return;
-          }
-    
-          const [x1, y1] = points[i];
-          const [x2, y2] = points[i + 1];
+      path.forEach(pathLine=>{
+        for(let i = 0 ; i<pathLine.length-1;i++){
+          setTimeout(()=>{
           let radius = color !== "white" ? 15 : 40;
-          
-          const line = new fabric.Line([x1 - radius/2, y1 - radius/2, x2 - radius/2, y2 - radius/2], {
-            strokeWidth: color !== "white" ? 15 : 40,
+
+          let lastX = pathLine[i][0]
+          let lastY = pathLine[i][1]
+
+          let newX = pathLine[i+1][0]
+          let newY = pathLine[i+1][1]
+          const line = new fabric.Line([lastX - radius / 2, lastY - radius / 2,newX - radius / 2, newY - radius / 2], {
+            strokeWidth: radius,
             stroke: color,
             strokeDashOffset: 10,
             strokeLineCap: 'round',
@@ -81,11 +81,12 @@ const Canvas = () => {
             selectable: false,
             hoverCursor: "default"
           });
-          canvas.add(line);
-    
-          i++;
-        }, 5); // Adjust the interval time (in milliseconds) for smoother animation
-      });
+
+          newCanvas.add(line)
+        },10+10*i)
+        }
+
+      })
     };
     
  
@@ -105,7 +106,6 @@ const Canvas = () => {
     let lastY = 0;
 
     const handleMouseDown = (options) => {
-      console.log('fdf');
       if ((options.target && canvas.getActiveObject(options.target))) {
         isDrawing= false
       }else{
@@ -154,17 +154,13 @@ const Canvas = () => {
       squares:[],
       texts:[]
       },
-      color:colorState
+      color:colorState,
+      action:'add'
       }))
      
-      setPath([...pathState,[...path]])
+      setPath([])
       path=[]
     };
-
-    const clearAll = ()=>{
-
-    }
-
 
   
 
@@ -208,19 +204,13 @@ const Canvas = () => {
   }, [canvas, colorState, pathState]);
 
   const clearAll = (path)=>{
-    ws.send(JSON.stringify(
-      {id:'65db8ab758d8608248f94bb4',
-      data:{
-      line:[],
-      eraser:[],
-      squares:[],
-      texts:[]
-      },
-      color:colorState
-      }))
-     
-      setPath([])
-      path=[]
+    ws.send(JSON.stringify({
+      id:'65db8ab758d8608248f94bb4',
+      action:'clear'
+    }))
+   
+    setPath([])
+    path=[]
 
   }
 

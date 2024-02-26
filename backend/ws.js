@@ -7,29 +7,39 @@ const wsconnect = ()=>{
     const tableClients = {}
     server.on('connection', ws => {
         ws.on('message', async message => {
-            const clientId =  Math.random().toString(36).substring(7);
-            const tableId = JSON.parse(message)
 
-            if(typeof JSON.parse(message) == 'string' ){               
-                tableClients[tableId] = tableClients[tableId]?[...tableClients[tableId], {clientId,ws}]:[{clientId, ws}] 
-                const table = await Tables.findById(tableId)
+            if(JSON.parse(message).action == 'clear' ){ 
+                let id = JSON.parse(message).id
 
-                ws.send(JSON.stringify(table))
+                const newtable = await Tables.findByIdAndUpdate(id,{
+                    eraser:[],
+                    texts:[],
+                    line:[],
+                    squares:[]
+                })            
+                server.clients.forEach(client=>{
+                    client.send("clear")
+                })
 
 
-            }else if(typeof JSON.parse(message) === 'object'){
+            }else if(JSON.parse(message).action == 'add'){
                 const req = JSON.parse(message)
+                console.log(req);
                 const table = await Tables.findById(req.id)
-                table.line.push([req.data.line])    
+
                 console.log(table);
-                const newtable = await Tables.findByIdAndUpdate(req.id,{ eraser:table.eraser, line: [...table.line,[...req.data.line]],squares:table.squares, texts:table.texts})
+
+                const newtable = await Tables.findByIdAndUpdate(req.id,{
+                eraser:req.color == 'white'?[...table.eraser, [...req.data.line]]:[...table.eraser],
+                line: req.color!= 'white'?[...table.line , [...req.data.line]]:[...table.line],
+                squares:table.squares, 
+                texts:table.texts})
+
+                
+
                 server.clients.forEach(client=>{
                     client.send(JSON.stringify({...req.data ,line:[req.data.line],color:req.color}))
                 })
-                
-                    
-               
-            
             }
 
         });

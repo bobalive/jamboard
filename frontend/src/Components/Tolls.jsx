@@ -2,9 +2,7 @@ import React from 'react'
 
 export const Tolls = ({setColorState , colorState , canvas , clearAll}) => {
     const clearAllhandler = ()=>{
-      canvas.remove.apply(canvas, canvas.getObjects().concat()) 
       clearAll()
-    
       }
       const addText = ()=>{
         const text = new fabric.Textbox('text!', {
